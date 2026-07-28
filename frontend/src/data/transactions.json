@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "description": "Grocery Store",
+    "amount": 45.30,
+    "category": "Food",
+    "date": "2026-07-29",
+    "type": "expense"
+  },
+  {
+    "id": 2,
+    "description": "Salary",
+    "amount": 2000,
+    "category": "Income",
+    "date": "2026-07-28",
+    "type": "income"
+  },
+  {
+    "id": 3,
+    "description": "Electricity Bill",
+    "amount": 60,
+    "category": "Utilities",
+    "date": "2026-07-27",
+    "type": "expense"
+  },
+  {
+    "id": 4,
+    "description": "Freelance Project",
+    "amount": 350,
+    "category": "Income",
+    "date": "2026-07-26",
+    "type": "income"
+  },
+  {
+    "id": 5,
+    "description": "Coffee Shop",
+    "amount": 8.50,
+    "category": "Food",
+    "date": "2026-07-25",
+    "type": "expense"
+  }
+]
