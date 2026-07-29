@@ -4,15 +4,13 @@ function Sidebar() {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.headingContainer}>
+      
         <img
-          src="/favicon.png"
-          alt="Expense Tracker Logo"
+          src="/Logo.png"
+          alt="Spentra Logo"
           className={styles.headingLogo}
-        />
-
-        <h2>Expense Tracker</h2>
+        />     
       </div>
-
       <nav>
         <ul>
           <li>Dashboard</li>

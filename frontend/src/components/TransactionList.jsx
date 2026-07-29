@@ -1,16 +1,13 @@
 import TransactionCard from './TransactionCard'
 
-function TransactionList({ transactions }) {
+function TransactionList({ transactions, onDelete }) {
   return (
     <div className="transactions">
       {transactions.map((tx) => (
         <TransactionCard
           key={tx.id}
-          description={tx.description}
-          amount={tx.amount}
-          category={tx.category}
-          date={tx.date}
-          type={tx.type}
+          {...tx}
+          onDelete={() => onDelete(tx.id)}
         />
       ))}
     </div>

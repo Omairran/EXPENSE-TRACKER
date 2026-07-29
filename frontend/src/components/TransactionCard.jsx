@@ -1,18 +1,19 @@
 import styles from './TransactionCard.module.css'
 
-function TransactionCard({ description, amount, category, date, type }) {
+function TransactionCard({ description, amount, category, date, type, onDelete }) {
   return (
-    <div className={`${styles.card} ${styles[type] || ''}`}>
-      <div className="transaction-info">
+    <div className={`${styles.card} ${styles[type]}`}>
+      <div>
         <p className={styles.description}>{description}</p>
         <p className={styles.category}>{category}</p>
       </div>
-      <div className="transaction-meta">
+      <div>
         <p className={styles.amount}>
           {type === 'income' ? '+' : '-'}${Math.abs(amount)}
         </p>
         <p className={styles.date}>{date}</p>
       </div>
+      <button onClick={onDelete} className={styles.deleteBtn}>✕</button>
     </div>
   )
 }

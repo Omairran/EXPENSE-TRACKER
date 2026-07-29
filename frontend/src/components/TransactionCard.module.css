@@ -3,20 +3,22 @@
   justify-content: space-between;
   align-items: center;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgb(221, 210, 210);
   border-radius: 8px;
   padding: 0.9rem 1.2rem;
   margin-bottom: 0.7rem;
+
 }
 
 .description {
   font-weight: 600;
   margin: 0;
+  color: black;
 }
 
 .category {
   font-size: 0.85rem;
-  color: #64748b;
+  color: black;
   margin: 0.2rem 0 0;
 }
 
@@ -37,5 +39,16 @@
 }
 
 .expense .amount {
+  color: #dc2626;
+}
+.deleteBtn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.deleteBtn:hover {
   color: #dc2626;
 }

@@ -1,21 +1,17 @@
 .sidebar {
   width: 220px;
-  background: #1e293b;
+  background: #213d69;
   color: #f1f5f9;
   height: 100vh;
   padding: 1.5rem 1rem;
   box-sizing: border-box;
+  
 }
 
-.sidebar h2 {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: #f1f5f9;
-}
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
+  padding: 10px;
 }
 
 .sidebar li {
@@ -32,24 +28,22 @@
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
-    height: auto;
+    height: 50px;
   }
 }
 
-.headingContainer {
+.headingContainer
+{
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 1.5rem;
 }
 
 .headingLogo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  background: white;
-  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  object-fit: center;
+  border-radius: 5%;
 }
 
-.headingContainer h2 {
-  margin: 0;
-}

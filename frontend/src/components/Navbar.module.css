@@ -3,11 +3,25 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  background: #ffffff;
+  background: white;
   border-bottom: 1px solid #e2e8f0;
+
 }
 
 .navbar h3 {
   margin: 0;
   font-size: 1.1rem;
+}
+.userInfo {
+  font-size: 1rem;
+  color: white;
+  background-color: black;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+}
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: black;
 }
