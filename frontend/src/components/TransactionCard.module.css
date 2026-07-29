@@ -1,0 +1,41 @@
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.9rem 1.2rem;
+  margin-bottom: 0.7rem;
+}
+
+.description {
+  font-weight: 600;
+  margin: 0;
+}
+
+.category {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0.2rem 0 0;
+}
+
+.amount {
+  font-weight: 700;
+  margin: 0;
+}
+
+.date {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0.2rem 0 0;
+  text-align: right;
+}
+
+.income .amount {
+  color: #16a34a;
+}
+
+.expense .amount {
+  color: #dc2626;
+}

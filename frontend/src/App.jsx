@@ -2,14 +2,17 @@ import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import TransactionList from './components/TransactionList'
 import transactions from './data/transactions.json'
+import './App.css'
 
 function App() {
   return (
-    <div className="app-layout">
+    <div className="appLayout">
       <Sidebar />
-      <div className="main-content">
+      <div className="mainContent">
         <Navbar userName="Umair Ahmad" />
-        <TransactionList transactions={transactions} />
+        <div className="transactionsArea">
+          <TransactionList transactions={transactions} />
+        </div>
       </div>
     </div>
   )
