@@ -9,7 +9,7 @@ function TransactionCard({ description, amount, category, date, type, onDelete }
       </div>
       <div>
         <p className={styles.amount}>
-          {type === 'income' ? '+' : '-'}${Math.abs(amount)}
+          {type === 'income' ? '+' : '-'}Rs {Math.abs(amount)}
         </p>
         <p className={styles.date}>{date}</p>
       </div>

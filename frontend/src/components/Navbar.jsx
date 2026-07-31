@@ -1,10 +1,24 @@
+import { useLocation } from 'react-router-dom'
 import styles from './Navbar.module.css'
 
-function Navbar({ userName }) {
+function Navbar({ userName = "User" }) {
+  const location = useLocation()
+  
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/': return 'Dashboard'
+      case '/transactions': return 'Transactions'
+      case '/budgets': return 'Budgets'
+      case '/import': return 'Import Data'
+      case '/reports': return 'Reports'
+      default: return 'Expense Tracker'
+    }
+  }
+
   return (
     <header className={styles.navbar}>
       <div className={styles.logoContainer}>
-        <h3>Dashboard</h3>
+        <h3>{getPageTitle()}</h3>
       </div>
       
       <div className={styles.userInfo}>

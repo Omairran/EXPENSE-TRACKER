@@ -1,0 +1,68 @@
+.budgetGrid {
+  display: grid;
+  top: 0; left: 10; right: 10; bottom: 0;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.budgetCard {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.budgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.budgetHeader h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.budgetHeader span {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.overBudget {
+  color: #ef4444 !important;
+}
+
+.progressBarBg {
+  background: #e5e7eb;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease-in-out;
+}
+
+.safe {
+  background: #10b981;
+}
+
+.warning {
+  background: #f59e0b;
+}
+
+.danger {
+  background: #ef4444;
+}
+
+.budgetFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #6b7280;
+}

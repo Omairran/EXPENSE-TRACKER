@@ -1,0 +1,57 @@
+.uploadContainer {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  margin-top: 20px;
+}
+
+.fileDropArea {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  background-color: #f9fafb;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.fileDropArea:hover {
+  border-color: #6366f1;
+  background-color: #eef2ff;
+}
+
+.fileInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.selectedFile {
+  font-weight: 500;
+  color: #4f46e5;
+  margin-bottom: 20px;
+}
+
+.message {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
