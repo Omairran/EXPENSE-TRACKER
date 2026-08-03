@@ -20,7 +20,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard-content">
-      <h1>Overview</h1>
       {summary ? (
         <div className="summary-cards">
           <div className="card">

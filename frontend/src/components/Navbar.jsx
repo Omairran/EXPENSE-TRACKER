@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import styles from './Navbar.module.css'
 
-function Navbar({ userName = "User" }) {
+function Navbar({ userName = "Umair Ahmad" }) {
   const location = useLocation()
   
   const getPageTitle = () => {
