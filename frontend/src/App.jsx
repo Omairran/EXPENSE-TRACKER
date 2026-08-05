@@ -10,16 +10,21 @@ import './App.css'
 
 function Dashboard() {
   const [summary, setSummary] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/transactions/summary/')
       .then(res => res.json())
       .then(data => setSummary(data))
-      .catch(err => console.error("Error fetching summary:", err))
+      .catch(err => {
+        console.error("Error fetching summary:", err)
+        setError("Failed to load dashboard summary.")
+      })
   }, [])
 
   return (
     <div className="dashboard-content">
+      {error && <p className="error-state" style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
       {summary ? (
         <div className="summary-cards">
           <div className="card">

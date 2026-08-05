@@ -5,6 +5,7 @@ import AddTransaction from './AddTransaction'
 function TransactionList() {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [categories, setCategories] = useState([])
 
@@ -20,9 +21,11 @@ function TransactionList() {
       .then(data => {
         setTransactions(data)
         setLoading(false)
+        setError(null)
       })
       .catch(err => {
         console.error("Error fetching transactions:", err)
+        setError("Failed to load transactions.")
         setLoading(false)
       })
   }
@@ -70,6 +73,7 @@ function TransactionList() {
   });
 
   if (loading) return <p>Loading transactions...</p>
+  if (error) return <p className="error-state" style={{ color: 'red', textAlign: 'center', marginTop: '20px' }}>{error}</p>
 
   return (
     <div className="transaction-list-page">

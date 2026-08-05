@@ -4,6 +4,7 @@ import styles from './Budgets.module.css'
 function Budgets() {
   const [budgets, setBudgets] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/budgets/progress/')
@@ -14,11 +15,13 @@ function Budgets() {
       })
       .catch(err => {
         console.error("Error fetching budgets:", err)
+        setError("Failed to load budgets.")
         setLoading(false)
       })
   }, [])
 
   if (loading) return <p>Loading budgets...</p>
+  if (error) return <p className="error-state" style={{ color: 'red', textAlign: 'center', marginTop: '20px' }}>{error}</p>
 
   return (
     <div className="page-content">

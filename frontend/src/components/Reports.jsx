@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 function Reports() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/transactions/category_breakdown/')
@@ -19,6 +20,7 @@ function Reports() {
       })
       .catch(err => {
         console.error("Error fetching report data:", err)
+        setError("Failed to load report data.")
         setLoading(false)
       })
   }, [])
@@ -26,6 +28,7 @@ function Reports() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ffc658'];
 
   if (loading) return <p>Loading reports...</p>
+  if (error) return <p className="error-state" style={{ color: 'red', textAlign: 'center', marginTop: '20px' }}>{error}</p>
 
   return (
     <div className="page-content">
