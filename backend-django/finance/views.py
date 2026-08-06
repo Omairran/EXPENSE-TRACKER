@@ -1,18 +1,43 @@
-from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
+from django.contrib.auth.models import User
 from .models import Category, Transaction, Budget
-from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer
+from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all().order_by('-date')
     serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user).order_by('-date')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    # Day 21: Analytics endpoint (spending summary)
     @action(detail=False, methods=['get'])
     def summary(self, request):
         queryset = self.get_queryset()
@@ -25,15 +50,23 @@ class TransactionViewSet(viewsets.ModelViewSet):
             'balance': balance
         })
 
+    # Day 21: Analytics endpoint (category breakdown)
     @action(detail=False, methods=['get'])
     def category_breakdown(self, request):
         expenses = self.get_queryset().filter(type='expense')
         breakdown = expenses.values('category__name').annotate(total=Sum('amount')).order_by('-total')
         return Response(breakdown)
 
+# Day 20: Budget endpoints (monthly limit CRUD & progress)
 class BudgetViewSet(viewsets.ModelViewSet):
-    queryset = Budget.objects.all()
     serializer_class = BudgetSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'])
     def progress(self, request):
@@ -42,7 +75,8 @@ class BudgetViewSet(viewsets.ModelViewSet):
         for budget in budgets:
             spent = Transaction.objects.filter(
                 category=budget.category,
-                type='expense'
+                type='expense',
+                user=request.user
             ).aggregate(Sum('amount'))['amount__sum'] or 0
             
             progress_data.append({

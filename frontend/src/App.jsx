@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
@@ -6,26 +6,53 @@ import TransactionList from './components/TransactionList'
 import ImportData from './components/ImportData'
 import Budgets from './components/Budgets'
 import Reports from './components/Reports'
+import Login from './components/Login'
+import Register from './components/Register'
+import { AuthProvider } from './context/AuthContext'
+import AuthContext from './context/AuthContext'
+import PrivateRoute from './utils/PrivateRoute'
 import './App.css'
 
 function Dashboard() {
   const [summary, setSummary] = useState(null)
   const [error, setError] = useState(null)
+  const { authTokens, logoutUser, user } = useContext(AuthContext)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/transactions/summary/')
-      .then(res => res.json())
+    if (!authTokens) return;
+
+    fetch('http://localhost:8000/api/transactions/summary/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401){
+          logoutUser()
+          throw new Error('Unauthorized')
+        }
+        if(!res.ok) throw new Error('Failed to fetch')
+        return res.json()
+      })
       .then(data => setSummary(data))
       .catch(err => {
-        console.error("Error fetching summary:", err)
-        setError("Failed to load dashboard summary.")
+        if (err.message !== 'Unauthorized') {
+          console.error("Error fetching summary:", err)
+          setError("Failed to load dashboard summary.")
+        }
       })
-  }, [])
+  }, [authTokens, logoutUser])
 
   return (
     <div className="dashboard-content">
+      <div className="welcome-banner">
+        <h2>Welcome, <span>{user?.username || 'User'}</span>!</h2>
+        <p>Here's a quick overview of your finances.</p>
+      </div>
+      {/* Day 25: UX polish: loading states, friendly error messages */}
       {error && <p className="error-state" style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-      {summary ? (
+      {summary && !summary.detail ? (
         <div className="summary-cards">
           <div className="card">
             <h3>Total Income</h3>
@@ -47,22 +74,36 @@ function Dashboard() {
   )
 }
 
-function App() {
+function MainLayout() {
   return (
-    <Router>
-      <div className="app-layout">
-        <Sidebar />
-        <div className="main-content">
-          <Navbar />
-          <Routes>
+    <div className="app-layout">
+      <Sidebar />
+      <div className="main-content">
+        <Navbar />
+        <Routes>
+          <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/transactions" element={<TransactionList />} />
             <Route path="/import" element={<ImportData />} />
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/reports" element={<Reports />} />
-          </Routes>
-        </div>
+          </Route>
+        </Routes>
       </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/*" element={<MainLayout />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   )
 }
