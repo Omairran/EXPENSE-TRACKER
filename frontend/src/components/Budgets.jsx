@@ -1,14 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import styles from './Budgets.module.css'
 
 function Budgets() {
   const [budgets, setBudgets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { authTokens, logoutUser } = useContext(AuthContext)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/budgets/progress/')
-      .then(res => res.json())
+    if (!authTokens) return;
+
+    fetch('http://localhost:8000/api/budgets/progress/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401) {
+          logoutUser();
+          throw new Error('Unauthorized');
+        }
+        if(!res.ok) throw new Error('Failed to fetch');
+        return res.json()
+      })
       .then(data => {
         setBudgets(data)
         setLoading(false)
@@ -18,7 +34,7 @@ function Budgets() {
         setError("Failed to load budgets.")
         setLoading(false)
       })
-  }, [])
+  }, [authTokens, logoutUser])
 
   if (loading) return <p>Loading budgets...</p>
   if (error) return <p className="error-state" style={{ color: 'red', textAlign: 'center', marginTop: '20px' }}>{error}</p>
@@ -32,6 +48,7 @@ function Budgets() {
         ) : (
           budgets.map(budget => (
             <div key={budget.id} className={styles.budgetCard}>
+              {/* Day 23: Budget tracking UI: progress bars, over-budget alerts */}
               <div className={styles.budgetHeader}>
                 <h3>{budget.category_name}</h3>
                 <span className={budget.percentage >= 100 ? styles.overBudget : ''}>

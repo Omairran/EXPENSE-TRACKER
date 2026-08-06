@@ -1,14 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 function Reports() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { authTokens, logoutUser } = useContext(AuthContext)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/transactions/category_breakdown/')
-      .then(res => res.json())
+    if (!authTokens) return;
+
+    fetch('http://localhost:8000/api/transactions/category_breakdown/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401) {
+          logoutUser();
+          throw new Error('Unauthorized');
+        }
+        if(!res.ok) throw new Error('Failed to fetch');
+        return res.json()
+      })
       .then(resData => {
         // Prepare data for recharts
         const chartData = resData.map(item => ({
@@ -23,7 +39,7 @@ function Reports() {
         setError("Failed to load report data.")
         setLoading(false)
       })
-  }, [])
+  }, [authTokens, logoutUser])
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ffc658'];
 
@@ -35,6 +51,7 @@ function Reports() {
       
       
       <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginTop: '20px' }}>
+        {/* Day 22: React dashboard charts (spending by category using Recharts) */}
         <h3>Spending by Category</h3>
         {data.length === 0 ? (
           <p className="empty-state">No expense data available for charts.</p>

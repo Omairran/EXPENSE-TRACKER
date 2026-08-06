@@ -1,6 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Category(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     color = models.CharField(max_length=7, default="#000000") # Hex color code
 
@@ -13,6 +15,7 @@ class Transaction(models.Model):
         ('expense', 'Expense'),
     )
     
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(db_index=True)
@@ -23,7 +26,9 @@ class Transaction(models.Model):
     def __str__(self):
         return f"{self.type.capitalize()} - {self.amount} on {self.date}"
 
+# Day 20: Budget model (monthly limit per category)
 class Budget(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     category = models.OneToOneField(Category, on_delete=models.CASCADE)
     limit = models.DecimalField(max_digits=10, decimal_places=2)
     month = models.IntegerField(help_text="Month number (1-12)", null=True, blank=True)
