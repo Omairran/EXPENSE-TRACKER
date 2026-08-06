@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import styles from './AddTransaction.module.css'
 
 function AddTransaction({ onAdd, onCancel }) {
@@ -12,13 +13,21 @@ function AddTransaction({ onAdd, onCancel }) {
   
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
+  const { authTokens, logoutUser } = useContext(AuthContext)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/categories/')
-      .then(res => res.json())
+    fetch('http://localhost:8000/api/categories/', {
+      headers: {
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401) logoutUser();
+        return res.json()
+      })
       .then(data => setCategories(data))
       .catch(err => console.error(err))
-  }, [])
+  }, [authTokens, logoutUser])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -29,6 +38,7 @@ function AddTransaction({ onAdd, onCancel }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + String(authTokens.access)
         },
         body: JSON.stringify({
           ...formData,

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import TransactionCard from './TransactionCard'
 import AddTransaction from './AddTransaction'
 
@@ -8,6 +9,7 @@ function TransactionList() {
   const [error, setError] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [categories, setCategories] = useState([])
+  const { authTokens, logoutUser } = useContext(AuthContext)
 
   // Filter states
   const [filterType, setFilterType] = useState('all')
@@ -16,8 +18,21 @@ function TransactionList() {
   const [filterEndDate, setFilterEndDate] = useState('')
 
   const fetchTransactions = () => {
-    fetch('http://localhost:8000/api/transactions/')
-      .then(res => res.json())
+    if (!authTokens) return;
+    fetch('http://localhost:8000/api/transactions/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401) {
+          logoutUser();
+          throw new Error('Unauthorized');
+        }
+        if(!res.ok) throw new Error('Failed to fetch');
+        return res.json()
+      })
       .then(data => {
         setTransactions(data)
         setLoading(false)
@@ -32,8 +47,21 @@ function TransactionList() {
 
   useEffect(() => {
     fetchTransactions()
-    fetch('http://localhost:8000/api/categories/')
-      .then(res => res.json())
+    if (!authTokens) return;
+    fetch('http://localhost:8000/api/categories/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + String(authTokens.access)
+      }
+    })
+      .then(res => {
+        if(res.status === 401) {
+          logoutUser();
+          throw new Error('Unauthorized');
+        }
+        if(!res.ok) throw new Error('Failed to fetch');
+        return res.json()
+      })
       .then(data => setCategories(data))
       .catch(err => console.error("Error fetching categories:", err))
   }, [])
@@ -44,6 +72,9 @@ function TransactionList() {
     try {
       const response = await fetch(`http://localhost:8000/api/transactions/${id}/`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + String(authTokens.access)
+        }
       });
       if (response.ok) {
         setTransactions(transactions.filter(txn => txn.id !== id));

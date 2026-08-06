@@ -1,52 +1,56 @@
 .sidebar {
   position: fixed;
   width: 220px;
-  background: #213d69;
-  color: #f1f5f9;
+  background: #0f172a;
+  color: #f8fafc;
   height: 100vh;
   padding: 1.5rem 1rem;
   box-sizing: border-box;
-  
+  z-index: 100;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 10px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sidebar li {
   padding: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 0.5rem;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar a {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 0.8rem 1rem;
-  color: inherit;
+  color: #cbd5e1;
   text-decoration: none;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
 .sidebar li:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   transform: translateX(4px);
 }
 
-.active {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: #6366f1 !important;
-  font-weight: 600 !important;
+.sidebar li:hover a {
+  color: #ffffff;
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: 50px;
-  }
+.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%) !important;
+  color: #818cf8 !important;
+  font-weight: 600 !important;
+  border-left: 3px solid #818cf8;
 }
 
 .headingContainer {
@@ -55,17 +59,63 @@
   justify-content: center;
   margin-bottom: 2rem;
   padding: 10px 0;
-  }
+}
 
 .headingLogo {
   width: 100%;
-  max-width: 150px;
+  max-width: 140px;
   height: auto;
   object-fit: contain;
   border-radius: 8px;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
 
 .headingLogo:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 70px;
+    bottom: 0;
+    top: auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+  }
+
+  .headingContainer {
+    display: none; /* Hide logo on mobile bottom nav */
+  }
+
+  .sidebar ul {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    gap: 0;
+  }
+
+  .sidebar li {
+    flex: 1;
+  }
+
+  .sidebar li:hover {
+    transform: none;
+  }
+
+  .sidebar a {
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    flex-direction: column;
+  }
+  
+  .active {
+    border-left: none;
+    border-top: 3px solid #818cf8;
+    background: rgba(99, 102, 241, 0.1) !important;
+  }
 }

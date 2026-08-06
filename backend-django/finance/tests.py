@@ -2,24 +2,30 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
+from django.contrib.auth.models import User
 from .models import Category, Transaction, Budget
 
+# Day 27: Write tests: Django unit/API tests
 class FinanceTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.category = Category.objects.create(name="Food", color="#ff0000")
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+        self.category = Category.objects.create(name="Food", color="#ff0000", user=self.user)
         self.transaction = Transaction.objects.create(
             amount=10.50,
             category=self.category,
             date="2026-08-01",
             description="Lunch",
-            type="expense"
+            type="expense",
+            user=self.user
         )
         self.budget = Budget.objects.create(
             category=self.category,
             limit=100.00,
             month=8,
-            year=2026
+            year=2026,
+            user=self.user
         )
 
     def test_category_creation(self):
