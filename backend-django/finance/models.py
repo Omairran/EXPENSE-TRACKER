@@ -15,9 +15,9 @@ class Transaction(models.Model):
     
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     description = models.CharField(max_length=255, blank=True)
-    type = models.CharField(max_length=10, choices=TRANSACTION_TYPES, default='expense')
+    type = models.CharField(max_length=10, choices=TRANSACTION_TYPES, default='expense', db_index=True)
     merchant = models.CharField(max_length=255, blank=True)
 
     def __str__(self):

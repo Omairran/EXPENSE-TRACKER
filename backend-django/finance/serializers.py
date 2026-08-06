@@ -14,9 +14,19 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = '__all__'
 
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero.")
+        return value
+
 class BudgetSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
 
     class Meta:
         model = Budget
         fields = '__all__'
+
+    def validate_limit(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Budget limit must be greater than zero.")
+        return value

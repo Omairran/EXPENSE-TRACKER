@@ -78,6 +78,15 @@ async def parse_csv(file: UploadFile = File(...)):
                 category_name = auto_categorize(desc_val)
                 category_id = get_category_id(category_name, cursor)
 
+                # Check for duplicates
+                cursor.execute("""
+                    SELECT id FROM finance_transaction
+                    WHERE date = ? AND amount = ? AND description = ?
+                """, (parsed_date, amount, desc_val))
+                if cursor.fetchone():
+                    print(f"Skipping duplicate transaction: {desc_val} on {parsed_date}")
+                    continue
+
                 cursor.execute("""
                     INSERT INTO finance_transaction (amount, date, description, type, merchant, category_id)
                     VALUES (?, ?, ?, ?, ?, ?)
