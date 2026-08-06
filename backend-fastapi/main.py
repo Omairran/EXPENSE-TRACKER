@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+# Day 16: FastAPI microservice setup as a separate service
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import sqlite3
@@ -17,15 +18,19 @@ app.add_middleware(
 
 DB_PATH = "../backend-django/db.sqlite3"
 
-def get_category_id(category_name: str, cursor) -> int:
-    cursor.execute("SELECT id FROM finance_category WHERE name = ?", (category_name,))
+def get_category_id(category_name: str, cursor, user_id: int = None) -> int:
+    if user_id:
+        cursor.execute("SELECT id FROM finance_category WHERE name = ? AND user_id = ?", (category_name, user_id))
+    else:
+        cursor.execute("SELECT id FROM finance_category WHERE name = ? AND user_id IS NULL", (category_name,))
     row = cursor.fetchone()
     if row:
         return row[0]
     # Default category creation if not found
-    cursor.execute("INSERT INTO finance_category (name, color) VALUES (?, ?)", (category_name, "#cccccc"))
+    cursor.execute("INSERT INTO finance_category (name, color, user_id) VALUES (?, ?, ?)", (category_name, "#cccccc", user_id))
     return cursor.lastrowid
 
+# Day 18: Auto-categorization logic (keyword/rule-based matching)
 def auto_categorize(merchant: str) -> str:
     merchant = merchant.lower()
     if any(word in merchant for word in ["walmart", "target", "grocery", "food"]):
@@ -38,8 +43,9 @@ def auto_categorize(merchant: str) -> str:
         return "Income"
     return "Other"
 
+# Day 17: CSV bank-statement upload & parsing endpoint using pandas
 @app.post("/parse-csv")
-async def parse_csv(file: UploadFile = File(...)):
+async def parse_csv(file: UploadFile = File(...), user_id: int = Form(None)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
     
@@ -76,21 +82,27 @@ async def parse_csv(file: UploadFile = File(...)):
 
                 # Auto categorize
                 category_name = auto_categorize(desc_val)
-                category_id = get_category_id(category_name, cursor)
+                category_id = get_category_id(category_name, cursor, user_id)
 
                 # Check for duplicates
-                cursor.execute("""
-                    SELECT id FROM finance_transaction
-                    WHERE date = ? AND amount = ? AND description = ?
-                """, (parsed_date, amount, desc_val))
+                if user_id:
+                    cursor.execute("""
+                        SELECT id FROM finance_transaction
+                        WHERE date = ? AND amount = ? AND description = ? AND user_id = ?
+                    """, (parsed_date, amount, desc_val, user_id))
+                else:
+                    cursor.execute("""
+                        SELECT id FROM finance_transaction
+                        WHERE date = ? AND amount = ? AND description = ? AND user_id IS NULL
+                    """, (parsed_date, amount, desc_val))
                 if cursor.fetchone():
                     print(f"Skipping duplicate transaction: {desc_val} on {parsed_date}")
                     continue
 
                 cursor.execute("""
-                    INSERT INTO finance_transaction (amount, date, description, type, merchant, category_id)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (amount, parsed_date, desc_val, type_val, desc_val, category_id))
+                    INSERT INTO finance_transaction (amount, date, description, type, merchant, category_id, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (amount, parsed_date, desc_val, type_val, desc_val, category_id, user_id))
                 transactions_added += 1
             except Exception as e:
                 print(f"Skipping row due to error: {e}")

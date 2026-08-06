@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
+import AuthContext from '../context/AuthContext'
 import styles from './ImportData.module.css'
 
 function ImportData() {
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const { user } = useContext(AuthContext)
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -12,6 +14,7 @@ function ImportData() {
     }
   }
 
+  // Day 19: Wire FastAPI service to push parsed & categorized rows into shared DB
   const handleUpload = async () => {
     if (!file) return
 
@@ -20,6 +23,9 @@ function ImportData() {
     
     const formData = new FormData()
     formData.append("file", file)
+    if (user && user.user_id) {
+      formData.append("user_id", user.user_id)
+    }
 
     try {
       const response = await fetch('http://localhost:8001/parse-csv', {
