@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: expense_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-django:
+    build:
+      context: ./backend-django
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend-django:/app
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db
+
+  backend-fastapi:
+    build:
+      context: ./backend-fastapi
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend-fastapi:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  postgres_data:
