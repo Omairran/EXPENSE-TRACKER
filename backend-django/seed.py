@@ -1,4 +1,5 @@
 from finance.models import Category, Transaction, Budget
+from django.contrib.auth.models import User
 from datetime import date, timedelta
 import random
 
@@ -6,6 +7,12 @@ import random
 Transaction.objects.all().delete()
 Budget.objects.all().delete()
 Category.objects.all().delete()
+
+# Create or get user
+user, created = User.objects.get_or_create(username='demo_user', email='demo@example.com')
+if created:
+    user.set_password('password123')
+    user.save()
 
 # Create Categories
 categories_data = [
@@ -19,14 +26,14 @@ categories_data = [
 
 category_objs = {}
 for cat in categories_data:
-    obj = Category.objects.create(name=cat["name"], color=cat["color"])
+    obj = Category.objects.create(name=cat["name"], color=cat["color"], user=user)
     category_objs[cat["name"]] = obj
 
 # Create Budgets
-Budget.objects.create(category=category_objs["Food & Dining"], limit=15000, month=7, year=2026)
-Budget.objects.create(category=category_objs["Transportation"], limit=5000, month=7, year=2026)
-Budget.objects.create(category=category_objs["Entertainment"], limit=8000, month=7, year=2026)
-Budget.objects.create(category=category_objs["Shopping"], limit=12000, month=7, year=2026)
+Budget.objects.create(category=category_objs["Food & Dining"], limit=15000, month=7, year=2026, user=user)
+Budget.objects.create(category=category_objs["Transportation"], limit=5000, month=7, year=2026, user=user)
+Budget.objects.create(category=category_objs["Entertainment"], limit=8000, month=7, year=2026, user=user)
+Budget.objects.create(category=category_objs["Shopping"], limit=12000, month=7, year=2026, user=user)
 
 # Create Transactions (Real Data Simulation)
 today = date.today()
@@ -50,7 +57,8 @@ for t in transactions:
         date=today - timedelta(days=t["days_ago"]),
         description=t["desc"],
         type=t["type"],
-        merchant=t["merchant"]
+        merchant=t["merchant"],
+        user=user
     )
 
 print("Successfully seeded the database with Categories, Budgets, and Transactions in Rs!")

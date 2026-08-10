@@ -4,13 +4,23 @@ from .models import Category, Transaction, Budget
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Custom serializer for JWT token generation.
+    Includes additional user information (username, is_staff, is_superuser) in the token payload.
+    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token['username'] = user.username
+        token['is_staff'] = user.is_staff
+        token['is_superuser'] = user.is_superuser
         return token
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for handling user registration.
+    Validates and creates a new User instance.
+    """
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -24,6 +34,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'is_staff', 'is_superuser')
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

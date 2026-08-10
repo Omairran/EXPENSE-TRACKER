@@ -1,8 +1,9 @@
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
 from .models import Category, Transaction, Budget
 from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
@@ -16,6 +17,34 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+from rest_framework.views import APIView
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        total_users = User.objects.count()
+        total_transactions = Transaction.objects.count()
+        total_volume = Transaction.objects.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        users_data = []
+        for u in User.objects.all():
+            tx_count = Transaction.objects.filter(user=u).count()
+            users_data.append({
+                'id': u.id,
+                'username': u.username,
+                'email': u.email,
+                'is_staff': u.is_staff,
+                'transaction_count': tx_count,
+            })
+            
+        return Response({
+            'total_users': total_users,
+            'total_transactions': total_transactions,
+            'total_volume': total_volume,
+            'users': users_data
+        })
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -56,6 +85,25 @@ class TransactionViewSet(viewsets.ModelViewSet):
         expenses = self.get_queryset().filter(type='expense')
         breakdown = expenses.values('category__name').annotate(total=Sum('amount')).order_by('-total')
         return Response(breakdown)
+
+    # Day 21: Analytics endpoint (monthly trend)
+    @action(detail=False, methods=['get'])
+    def monthly_trend(self, request):
+        expenses = self.get_queryset().filter(type='expense')
+        trend = expenses.annotate(
+            month=TruncMonth('date')
+        ).values('month').annotate(
+            total=Sum('amount')
+        ).order_by('month')
+        
+        formatted_trend = []
+        for item in trend:
+            if item['month']:
+                formatted_trend.append({
+                    'month': item['month'].strftime('%b %Y'),
+                    'total': item['total']
+                })
+        return Response(formatted_trend)
 
 # Day 20: Budget endpoints (monthly limit CRUD & progress)
 class BudgetViewSet(viewsets.ModelViewSet):
