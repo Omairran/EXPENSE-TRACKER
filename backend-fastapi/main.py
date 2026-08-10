@@ -19,6 +19,10 @@ app.add_middleware(
 DB_PATH = "../backend-django/db.sqlite3"
 
 def get_category_id(category_name: str, cursor, user_id: int = None) -> int:
+    """
+    Retrieves the category ID for a given category name and user.
+    If the category does not exist, it creates a new one and returns the new ID.
+    """
     if user_id:
         cursor.execute("SELECT id FROM finance_category WHERE name = ? AND user_id = ?", (category_name, user_id))
     else:
@@ -32,6 +36,10 @@ def get_category_id(category_name: str, cursor, user_id: int = None) -> int:
 
 # Day 18: Auto-categorization logic (keyword/rule-based matching)
 def auto_categorize(merchant: str) -> str:
+    """
+    Categorizes a transaction based on the merchant's name using keyword matching.
+    Returns 'Other' if no rules match.
+    """
     merchant = merchant.lower()
     if any(word in merchant for word in ["walmart", "target", "grocery", "food"]):
         return "Groceries"
@@ -46,6 +54,10 @@ def auto_categorize(merchant: str) -> str:
 # Day 17: CSV bank-statement upload & parsing endpoint using pandas
 @app.post("/parse-csv")
 async def parse_csv(file: UploadFile = File(...), user_id: int = Form(None)):
+    """
+    Endpoint to upload and parse a CSV file containing bank statement transactions.
+    It reads the CSV using pandas, auto-categorizes the transactions, and saves them to the database.
+    """
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
     
