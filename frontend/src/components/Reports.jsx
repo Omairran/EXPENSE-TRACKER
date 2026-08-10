@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from 'react'
 import AuthContext from '../context/AuthContext'
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
 
 function Reports() {
   const [data, setData] = useState([])
+  const [trendData, setTrendData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { authTokens, logoutUser } = useContext(AuthContext)
@@ -11,28 +12,44 @@ function Reports() {
   useEffect(() => {
     if (!authTokens) return;
 
-    fetch('http://localhost:8000/api/transactions/category_breakdown/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + String(authTokens.access)
-      }
-    })
-      .then(res => {
-        if(res.status === 401) {
+    Promise.all([
+      fetch('http://localhost:8000/api/transactions/category_breakdown/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + String(authTokens.access)
+        }
+      }),
+      fetch('http://localhost:8000/api/transactions/monthly_trend/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + String(authTokens.access)
+        }
+      })
+    ])
+      .then(async ([catRes, trendRes]) => {
+        if(catRes.status === 401 || trendRes.status === 401) {
           logoutUser();
           throw new Error('Unauthorized');
         }
-        if(!res.ok) throw new Error('Failed to fetch');
-        return res.json()
-      })
-      .then(resData => {
+        if(!catRes.ok || !trendRes.ok) throw new Error('Failed to fetch');
+        
+        const catData = await catRes.json();
+        const trendData = await trendRes.json();
+        
         // Prepare data for recharts
-        const chartData = resData.map(item => ({
+        const chartData = catData.map(item => ({
           name: item.category__name || 'Uncategorized',
           value: parseFloat(item.total)
-        }))
-        setData(chartData)
-        setLoading(false)
+        }));
+        
+        const lineData = trendData.map(item => ({
+          name: item.month,
+          Total: parseFloat(item.total)
+        }));
+
+        setData(chartData);
+        setTrendData(lineData);
+        setLoading(false);
       })
       .catch(err => {
         console.error("Error fetching report data:", err)
@@ -75,6 +92,26 @@ function Reports() {
                 <Tooltip formatter={(value) => `Rs ${value}`} />
                 <Legend />
               </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+
+      <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginTop: '20px' }}>
+        <h3>Monthly Trend</h3>
+        {trendData.length === 0 ? (
+          <p className="empty-state">No trend data available.</p>
+        ) : (
+          <div style={{ width: '100%', height: 400 }}>
+            <ResponsiveContainer>
+              <LineChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value) => `Rs ${value}`} />
+                <Legend />
+                <Line type="monotone" dataKey="Total" stroke="#8884d8" activeDot={{ r: 8 }} />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         )}

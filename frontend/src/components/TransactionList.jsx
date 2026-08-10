@@ -3,6 +3,11 @@ import AuthContext from '../context/AuthContext'
 import TransactionCard from './TransactionCard'
 import AddTransaction from './AddTransaction'
 
+/**
+ * TransactionList Component
+ * Fetches and displays a list of the user's transactions.
+ * Provides filtering capabilities (by type, category, date) and the ability to add or delete transactions.
+ */
 function TransactionList() {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)

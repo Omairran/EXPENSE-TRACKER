@@ -3,6 +3,10 @@ import { useContext } from 'react'
 import AuthContext from '../context/AuthContext'
 import styles from './Navbar.module.css'
 
+/**
+ * Navbar Component
+ * Displays the top navigation bar, showing the current page title and user information/logout button.
+ */
 function Navbar() {
   const location = useLocation()
   const { user, logoutUser } = useContext(AuthContext)

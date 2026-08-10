@@ -8,11 +8,16 @@ import Budgets from './components/Budgets'
 import Reports from './components/Reports'
 import Login from './components/Login'
 import Register from './components/Register'
+import AdminPanel from './components/AdminPanel'
 import { AuthProvider } from './context/AuthContext'
 import AuthContext from './context/AuthContext'
 import PrivateRoute from './utils/PrivateRoute'
 import './App.css'
 
+/**
+ * Dashboard Component
+ * Fetches and displays a summary of the user's finances, including total income, total expenses, and balance.
+ */
 function Dashboard() {
   const [summary, setSummary] = useState(null)
   const [error, setError] = useState(null)
@@ -74,6 +79,10 @@ function Dashboard() {
   )
 }
 
+/**
+ * MainLayout Component
+ * Defines the overall structural layout for authenticated routes, including the Sidebar, Navbar, and main content area.
+ */
 function MainLayout() {
   return (
     <div className="app-layout">
@@ -87,6 +96,7 @@ function MainLayout() {
             <Route path="/import" element={<ImportData />} />
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/admin-panel" element={<AdminPanel />} />
           </Route>
         </Routes>
       </div>
