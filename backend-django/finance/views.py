@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
 from .models import Category, Transaction, Budget
-from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, UserSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -136,3 +136,22 @@ class BudgetViewSet(viewsets.ModelViewSet):
                 'percentage': (spent / budget.limit) * 100 if budget.limit > 0 else 0
             })
         return Response(progress_data)
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = [IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return RegisterSerializer
+        return UserSerializer
+
+class AdminCategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUser]
+
+class AdminBudgetViewSet(viewsets.ModelViewSet):
+    queryset = Budget.objects.all()
+    serializer_class = BudgetSerializer
+    permission_classes = [IsAdminUser]
