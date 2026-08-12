@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import TransactionList from './components/TransactionList'
@@ -20,27 +21,43 @@ import './App.css'
  */
 function Dashboard() {
   const [summary, setSummary] = useState(null)
+  const [chartData, setChartData] = useState([])
   const [error, setError] = useState(null)
   const { authTokens, logoutUser, user } = useContext(AuthContext)
 
   useEffect(() => {
     if (!authTokens) return;
 
-    fetch('http://localhost:8000/api/transactions/summary/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + String(authTokens.access)
-      }
-    })
-      .then(res => {
-        if(res.status === 401){
+    Promise.all([
+      fetch('http://localhost:8000/api/transactions/summary/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + String(authTokens.access)
+        }
+      }),
+      fetch('http://localhost:8000/api/transactions/category_breakdown/', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + String(authTokens.access)
+        }
+      })
+    ])
+      .then(async ([sumRes, catRes]) => {
+        if(sumRes.status === 401){
           logoutUser()
           throw new Error('Unauthorized')
         }
-        if(!res.ok) throw new Error('Failed to fetch')
-        return res.json()
+        if(!sumRes.ok || !catRes.ok) throw new Error('Failed to fetch data')
+        
+        const sumData = await sumRes.json();
+        const catData = await catRes.json();
+        
+        setSummary(sumData)
+        setChartData(catData.map(item => ({ 
+          name: item.category__name || 'Uncategorized', 
+          total: parseFloat(item.total) 
+        })))
       })
-      .then(data => setSummary(data))
       .catch(err => {
         if (err.message !== 'Unauthorized') {
           console.error("Error fetching summary:", err)
@@ -58,20 +75,41 @@ function Dashboard() {
       {/* Day 25: UX polish: loading states, friendly error messages */}
       {error && <p className="error-state" style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
       {summary && !summary.detail ? (
-        <div className="summary-cards">
-          <div className="card">
-            <h3>Total Income</h3>
-            <p className="income">Rs {summary.total_income}</p>
+        <>
+          <div className="summary-cards">
+            <div className="card">
+              <h3>Total Income</h3>
+              <p className="income">Rs {summary.total_income}</p>
+            </div>
+            <div className="card">
+              <h3>Total Expenses</h3>
+              <p className="expense">Rs {summary.total_expense}</p>
+            </div>
+            <div className="card">
+              <h3>Balance</h3>
+              <p className={summary.balance >= 0 ? "income" : "expense"}>Rs {summary.balance}</p>
+            </div>
           </div>
-          <div className="card">
-            <h3>Total Expenses</h3>
-            <p className="expense">Rs {summary.total_expense}</p>
+          
+          <div style={{ background: 'white', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginTop: '20px' }}>
+            <h3 style={{ marginBottom: '20px' }}>Expenses by Category</h3>
+            {chartData.length > 0 ? (
+              <div style={{ width: '100%', height: 350 }}>
+                <ResponsiveContainer>
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `Rs ${value}`} cursor={{fill: 'transparent'}} />
+                    <Bar dataKey="total" fill="#8884d8" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="empty-state">No expense data available for chart.</p>
+            )}
           </div>
-          <div className="card">
-            <h3>Balance</h3>
-            <p className={summary.balance >= 0 ? "income" : "expense"}>Rs {summary.balance}</p>
-          </div>
-        </div>
+        </>
       ) : (
         <p>Loading summary...</p>
       )}

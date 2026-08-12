@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
 from .models import Category, Transaction, Budget
@@ -51,7 +51,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Category.objects.filter(user=self.request.user)
+        return Category.objects.filter(Q(user=self.request.user) | Q(user__isnull=True))
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
